@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Porosh FF Top-Up | Diamond Shop</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; line-height: 1.5; padding: 14px; }
+    .container { max-width: 780px; margin: 10px auto; background: #1e293b; border-radius: 16px; padding: 20px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    .hidden { display: none !important; }
+    header { text-align: center; padding-bottom: 14px; border-bottom: 1px solid #334155; margin-bottom: 16px; }
+    header h1 { color: #f97316; font-size: 24px; }
+    .notice-bar { background: #172554; border: 1px solid #3b82f6; color: #dbeafe; padding: 10px 12px; border-radius: 10px; font-size: 13px; text-align: center; margin-bottom: 16px; }
+    .notice-bar.closed { background: #450a0a; border-color: #ef4444; color: #fecaca; }
+    .section-title { font-size: 15px; font-weight: 600; color: #38bdf8; margin: 18px 0 8px; }
+    .input-group { margin-bottom: 12px; }
+    label { display: block; font-size: 13px; margin-bottom: 5px; color: #cbd5e1; }
+    input, select { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; outline: none; }
+    input:focus, select:focus { border-color: #f97316; }
+    .packages { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+    .pkg-card { background: #0f172a; border: 2px solid #334155; border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+    .pkg-card.active { border-color: #f97316; background: #271a14; }
+    .pkg-name { font-weight: bold; font-size: 14px; }
+    .pkg-price { color: #22c55e; font-weight: bold; font-size: 14px; margin-top: 4px; }
+    .payment-box { background: #0f172a; border: 1px dashed #f97316; padding: 12px; border-radius: 10px; margin-bottom: 12px; font-size: 13px; }
+    .pay-row { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; }
+    .copy-btn { background: #334155; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; }
+    .btn { width: 100%; padding: 13px; border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+    .btn-primary { background: linear-gradient(90deg, #f97316, #ea580c); }
+    .btn-green { background: #16a34a; }
+    .btn-blue { background: #2563eb; }
+    .btn-red { background: #dc2626; }
+    .btn-gray { background: #475569; }
+    .btn-sm { width: auto; padding: 6px 10px; font-size: 12px; margin-top: 0; border-radius: 6px; }
+    footer { text-align: center; margin-top: 20px; padding-top: 12px; border-top: 1px solid #334155; font-size: 12px; color: #94a3b8; }
+    footer a { color: #94a3b8; text-decoration: none; cursor: pointer; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tab-btn { flex: 1; padding: 10px; background: #0f172a; border: 1px solid #334155; color: #cbd5e1; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; }
+    .tab-btn.active { background: #f97316; color: #fff; border-color: #f97316; }
+    .card-item { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; margin-bottom: 10px; font-size: 13px; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    .badge-Pending { background: #854d0e; color: #fef08a; }
+    .badge-Completed { background: #14532d; color: #bbf7d0; }
+    .badge-Cancelled { background: #7f1d1d; color: #fecaca; }
+    .actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; text-align: center; }
+    .stat-box { background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155; }
+    .stat-num { font-size: 18px; font-weight: bold; color: #f97316; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= কাস্টমার ওয়েবসাইট ================= -->
+  <div id="shopView" class="container">
+    <header>
+      <h1>🔥 Porosh FF Top-Up</h1>
+      <p style="font-size:13px; color:#94a3b8;">দ্রুত ও নিরাপদে শুধুমাত্র Player UID দিয়ে ডায়মন্ড টপ-আপ করুন</p>
+    </header>
+
+    <div id="shopNotice" class="notice-bar">লোড হচ্ছে...</div>
+
+    <form id="orderForm">
+      <div class="section-title">১. প্লেয়ার আইডি (UID)</div>
+      <div class="input-group">
+        <input type="number" id="uid" placeholder="Free Fire Player UID লিখুন" required />
+      </div>
+
+      <div class="section-title">২. ডায়মন্ড প্যাকেজ সিলেক্ট করুন</div>
+      <div id="packageList" class="packages">
+        <p style="color:#94a3b8; font-size:13px;">প্যাকেজ লোড হচ্ছে...</p>
+      </div>
+
+      <div class="section-title">৩. পেমেন্ট করুন (Send Money)</div>
+      <div class="payment-box" id="paymentNumbersBox">লোড হচ্ছে...</div>
+
+      <div class="input-group">
+        <label>পেমেন্ট মেথড</label>
+        <select id="method" required>
+          <option value="">সিলেক্ট করুন</option>
+          <option value="bKash">bKash (বিকাশ)</option>
+          <option value="Nagad">Nagad (নগদ)</option>
+          <option value="Rocket">Rocket (রকেট)</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>যে নম্বর থেকে টাকা পাঠিয়েছেন</label>
+        <input type="tel" id="sender" placeholder="01XXXXXXXXX" required />
+      </div>
+
+      <div class="input-group">
+        <label>Transaction ID (TrxID)</label>
+        <input type="text" id="trxid" placeholder="যেমন: 9K7A2B1C3D" required />
+      </div>
+
+      <div class="input-group">
+        <label>আপনার WhatsApp নম্বর</label>
+        <input type="tel" id="whatsapp" placeholder="যোগাযোগের জন্য" required />
+      </div>
+
+      <button type="submit" id="submitOrderBtn" class="btn btn-primary">অর্ডার কনফার্ম করুন</button>
+    </form>
+
+    <footer>
+      <p>⚠️ সতর্কতা: টপ-আপের জন্য কখনোই গেমের পাসওয়ার্ড লাগে না।</p>
+      <p style="margin-top:8px;"><a onclick="openAdminView()">🔒 Admin Login</a></p>
+    </footer>
+  </div>
+
+  <!-- ================= ADMIN LOGIN ================= -->
+  <div id="adminLoginView" class="container hidden">
+    <header>
+      <h1>🔐 Admin Login</h1>
+      <p style="font-size:13px; color:#94a3b8;">শুধুমাত্র অ্যাডমিনের জন্য</p>
+    </header>
+    <form id="loginForm">
+      <div class="input-group">
+        <label>Admin Email</label>
+        <input type="email" id="adminEmail" value="mdporoshbhai130@gmail.com" required />
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="adminPass" placeholder="Firebase-এ দেওয়া পাসওয়ার্ড লিখুন" required />
+      </div>
+      <button type="submit" class="btn btn-primary">লগইন করুন</button>
+      <button type="button" class="btn btn-gray" onclick="showShopView()">ওয়েবসাইটে ফিরে যান</button>
+    </form>
+  </div>
+
+  <!-- ================= ADMIN PANEL ================= -->
+  <div id="adminPanelView" class="container hidden">
+    <header style="display:flex; justify-content:space-between; align-items:center; text-align:left;">
+      <div>
+        <h1 style="font-size:20px;">⚙️ Admin Panel</h1>
+        <p style="font-size:12px; color:#94a3b8;">স্বাগতম, Porosh</p>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn btn-gray btn-sm" onclick="showShopView()">Shop</button>
+        <button class="btn btn-red btn-sm" id="logoutBtn">Logout</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('ordersTab', this)">📦 অর্ডার</button>
+      <button class="tab-btn" onclick="switchTab('packagesTab', this)">💎 প্যাকেজ</button>
+      <button class="tab-btn" onclick="switchTab('settingsTab', this)">⚙️ সেটিংস</button>
+    </div>
+
+    <!-- TAB 1: ORDERS -->
+    <div id="ordersTab">
+      <div class="stats">
+        <div class="stat-box"><div class="stat-num" id="statTotal">0</div><div style="font-size:11px;">মোট অর্ডার</div></div>
+        <div class="stat-box"><div class="stat-num" id="statPending" style="color:#facc15;">0</div><div style="font-size:11px;">Pending</div></div>
+        <div class="stat-box"><div class="stat-num" id="statDone" style="color:#22c55e;">0</div><div style="font-size:11px;">Completed</div></div>
+      </div>
+      <div id="adminOrdersList">অর্ডার লোড হচ্ছে...</div>
+    </div>
+
+    <!-- TAB 2: PACKAGES -->
+    <div id="packagesTab" class="hidden">
+      <div class="card-item">
+        <h3 style="margin-bottom:10px; font-size:15px; color:#38bdf8;">নতুন প্যাকেজ যোগ করুন</h3>
+        <div class="input-group">
+          <input type="text" id="newPkgName" placeholder="প্যাকেজের নাম (যেমন: 115 Diamonds)" />
+        </div>
+        <div class="input-group">
+          <input type="number" id="newPkgPrice" placeholder="দাম টাকায় (যেমন: 85)" />
+        </div>
+        <button class="btn btn-green" id="addPkgBtn">+ প্যাকেজ যোগ করুন</button>
+        <button class="btn btn-gray" id="addDefaultPkgsBtn" style="font-size:13px;">⚡ ডিফল্ট ডায়মন্ড প্যাকেজগুলো এক ক্লিকে যোগ করুন</button>
+      </div>
+      <div id="adminPackagesList"></div>
+    </div>
+
+    <!-- TAB 3: SETTINGS -->
+    <div id="settingsTab" class="hidden">
+      <div class="input-group">
+        <label>দোকানের অবস্থা (Shop Status)</label>
+        <select id="setShopStatus">
+          <option value="open">✅ চালু আছে (Open)</option>
+          <option value="closed">🔴 বন্ধ আছে (Closed)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>নোটিশ বার্তা</label>
+        <input type="text" id="setNotice" placeholder="যেমন: ৫-১০ মিনিটে ডেলিভারি দেওয়া হয়" />
+      </div>
+      <div class="input-group">
+        <label>বিকাশ নম্বর (Personal)</label>
+        <input type="text" id="setBkash" placeholder="01XXXXXXXXX" />
+      </div>
+      <div class="input-group">
+        <label>নগদ নম্বর (Personal)</label>
+        <input type="text" id="setNagad" placeholder="01XXXXXXXXX" />
+      </div>
+      <div class="input-group">
+        <label>রকেট নম্বর (না থাকলে খালি রাখুন)</label>
+        <input type="text" id="setRocket" placeholder="01XXXXXXXXX" />
+      </div>
+      <button class="btn btn-primary" id="saveSettingsBtn">সেটিংস সেভ করুন</button>
+    </div>
+  </div>
+
+  <!-- ================= FIREBASE SCRIPT ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+    import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCX6f9TZAjfcZKnGQEUBAKwbu85X9EKDPg",
+      authDomain: "porosh-top-up.firebaseapp.com",
+      databaseURL: "https://porosh-top-up-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "porosh-top-up",
+      storageBucket: "porosh-top-up.firebasestorage.app",
+      messagingSenderId: "486574395215",
+      appId: "1:486574395215:web:506de311b3621e1c8d7f3a",
+      measurementId: "G-T4EYBPW71W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let selectedPkg = null;
+    let currentSettings = {
+      status: "open",
+      notice: "🔥 ৫-১০ মিনিটে দ্রুত ডেলিভারি!",
+      bkash: "অ্যাডমিন প্যানেল থেকে নম্বর সেট করুন",
+      nagad: "",
+      rocket: ""
+    };
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt);
+      alert("কপি হয়েছে: " + txt);
+    }
+
+    window.showShopView = () => {
+      document.getElementById("shopView").classList.remove("hidden");
+      document.getElementById("adminLoginView").classList.add("hidden");
+      document.getElementById("adminPanelView").classList.add("hidden");
+      history.replaceState(null, "", " ");
+    };
+
+    window.openAdminView = () => {
+      document.getElementById("shopView").classList.add("hidden");
+      if (auth.currentUser) {
+        document.getElementById("adminLoginView").classList.add("hidden");
+        document.getElementById("adminPanelView").classList.remove("hidden");
+      } else {
+        document.getElementById("adminLoginView").classList.remove("hidden");
+        document.getElementById("adminPanelView").classList.add("hidden");
+      }
+    };
+
+    window.switchTab = (tabId, btn) => {
+      ["ordersTab", "packagesTab", "settingsTab"].forEach(id => document.getElementById(id).classList.add("hidden"));
+      document.getElementById(tabId).classList.remove("hidden");
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    };
+
+    if (window.location.hash === "#admin") window.openAdminView();
+
+    function addPayRow(container, labelText, numberVal) {
+      if (!numberVal) return;
+      const row = document.createElement("div");
+      row.className = "pay-row";
+      const span = document.createElement("span");
+      span.innerHTML = `${labelText} <b>${escapeHtml(numberVal)}</b>`;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.textContent = "Copy";
+      btn.onclick = () => copyText(numberVal);
+      row.append(span, btn);
+      container.appendChild(row);
+    }
+
+    // ১. সেটিংস রিয়েল-টাইম লোড
+    onValue(ref(db, "settings"), (snap) => {
+      const data = snap.val();
+      if (data) currentSettings = { ...currentSettings, ...data };
+
+      const noticeEl = document.getElementById("shopNotice");
+      const submitBtn = document.getElementById("submitOrderBtn");
+      if (currentSettings.status === "closed") {
+        noticeEl.className = "notice-bar closed";
+        noticeEl.textContent = "🔴 এখন টপ-আপ সাময়িকভাবে বন্ধ আছে! " + (currentSettings.notice || "");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "এখন অর্ডার নেওয়া বন্ধ আছে";
+      } else {
+        noticeEl.className = "notice-bar";
+        noticeEl.textContent = currentSettings.notice || "✅ টপ-আপ চালু আছে!";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "অর্ডার কনফার্ম করুন";
+      }
+
+      const payBox = document.getElementById("paymentNumbersBox");
+      payBox.innerHTML = "";
+      addPayRow(payBox, "🟡 <b>বিকাশ:</b>", currentSettings.bkash);
+      addPayRow(payBox, "🟠 <b>নগদ:</b>", currentSettings.nagad);
+      addPayRow(payBox, "🟣 <b>রকেট:</b>", currentSettings.rocket);
+      if (!payBox.hasChildNodes()) payBox.textContent = "পেমেন্ট নম্বর সেট করা হয়নি";
+
+      document.getElementById("setShopStatus").value = currentSettings.status || "open";
+      document.getElementById("setNotice").value = currentSettings.notice || "";
+      document.getElementById("setBkash").value = currentSettings.bkash || "";
+      document.getElementById("setNagad").value = currentSettings.nagad || "";
+      document.getElementById("setRocket").value = currentSettings.rocket || "";
+    });
+
+    // ২. ডায়মন্ড প্যাকেজ রিয়েল-টাইম লোড
+    onValue(ref(db, "packages"), (snap) => {
+      const data = snap.val();
+      const shopList = document.getElementById("packageList");
+      const adminList = document.getElementById("adminPackagesList");
+      shopList.innerHTML = "";
+      adminList.innerHTML = "";
+      selectedPkg = null;
+
+      if (!data) {
+        shopList.innerHTML = `<p style="color:#94a3b8; font-size:13px;">এখনো কোনো প্যাকেজ যোগ করা হয়নি।</p>`;
+        adminList.innerHTML = `<p style="color:#94a3b8; font-size:13px;">কোনো প্যাকেজ নেই। ওপর থেকে যোগ করুন।</p>`;
+        return;
+      }
+
+      Object.entries(data).forEach(([id, pkg]) => {
+        const card = document.createElement("div");
+        card.className = "pkg-card";
+        card.innerHTML = `<div class="pkg-name">💎 ${escapeHtml(pkg.name)}</div><div class="pkg-price">${escapeHtml(pkg.price)} টাকা</div>`;
+        card.onclick = () => {
+          document.querySelectorAll(".pkg-card").forEach(c => c.classList.remove("active"));
+          card.classList.add("active");
+          selectedPkg = { name: pkg.name, price: pkg.price };
+        };
+        shopList.appendChild(card);
+
+        const aItem = document.createElement("div");
+        aItem.className = "card-item";
+        aItem.style.display = "flex";
+        aItem.style.justifyContent = "space-between";
+        aItem.style.alignItems = "center";
+        aItem.style.gap = "8px";
+        aItem.innerHTML = `<div><b>${escapeHtml(pkg.name)}</b> — <span style="color:#22c55e;">${escapeHtml(pkg.price)} টাকা</span></div>`;
+
+        const btnGroup = document.createElement("div");
+        btnGroup.style.display = "flex";
+        btnGroup.style.gap = "6px";
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn btn-blue btn-sm";
+        editBtn.textContent = "Edit";
+        editBtn.onclick = () => {
+          const newPrice = prompt(pkg.name + " এর নতুন দাম লিখুন (টাকায়):", pkg.price);
+          if (newPrice && newPrice.trim() !== "") {
+            update(ref(db, "packages/" + id), { price: newPrice.trim() });
+          }
+        };
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "btn btn-red btn-sm";
+        delBtn.textContent = "Delete";
+        delBtn.onclick = () => { if (confirm("প্যাকেজটি ডিলিট করবেন?")) remove(ref(db, "packages/" + id)); };
+
+        btnGroup.append(editBtn, delBtn);
+        aItem.appendChild(btnGroup);
+        adminList.appendChild(aItem);
+      });
+    });
+
+    // ৩. কাস্টমার অর্ডার সাবমিট
+    document.getElementById("orderForm").onsubmit = async (e) => {
+      e.preventDefault();
+      if (!selectedPkg) return alert("দয়া করে একটি ডায়মন্ড প্যাকেজ সিলেক্ট করুন!");
+
+      const btn = document.getElementById("submitOrderBtn");
+      btn.disabled = true;
+      btn.textContent = "সাবমিট হচ্ছে...";
+
+      try {
+        const newRef = push(ref(db, "orders"));
+        await set(newRef, {
+          uid: document.getElementById("uid").value.trim(),
+          packageName: selectedPkg.name,
+          price: selectedPkg.price,
+          method: document.getElementById("method").value,
+          sender: document.getElementById("sender").value.trim(),
+          trxid: document.getElementById("trxid").value.trim(),
+          whatsapp: document.getElementById("whatsapp").value.trim(),
+          status: "Pending",
+          createdAt: Date.now()
+        });
+        alert("✅ আপনার অর্ডার সফলভাবে নেওয়া হয়েছে!\nOrder ID: " + newRef.key.slice(-6).toUpperCase() + "\nশীঘ্রই ডায়মন্ড পৌঁছে যাবে।");
+        e.target.reset();
+        document.querySelectorAll(".pkg-card").forEach(c => c.classList.remove("active"));
+        selectedPkg = null;
+      } catch (err) {
+        alert("অর্ডার সাবমিট করতে সমস্যা হয়েছে: " + err.message);
+      }
+      btn.disabled = false;
+      btn.textContent = "অর্ডার কনফার্ম করুন";
+    };
+
+    // ৪. অ্যাডমিন অথেনটিকেশন ও অর্ডার লোড
+    document.getElementById("loginForm").onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await signInWithEmailAndPassword(auth, document.getElementById("adminEmail").value.trim(), document.getElementById("adminPass").value);
+      } catch (err) {
+        alert("লগইন ব্যর্থ হয়েছে! ইমেইল বা পাসওয়ার্ড ভুল।");
+      }
+    };
+
+    document.getElementById("logoutBtn").onclick = () => signOut(auth);
+
+    let ordersUnsub = null;
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        if (!document.getElementById("adminLoginView").classList.contains("hidden") || window.location.hash === "#admin") {
+          document.getElementById("shopView").classList.add("hidden");
+          document.getElementById("adminLoginView").classList.add("hidden");
+          document.getElementById("adminPanelView").classList.remove("hidden");
+        }
+
+        ordersUnsub = onValue(ref(db, "orders"), (snap) => {
+          const data = snap.val();
+          const listEl = document.getElementById("adminOrdersList");
+          listEl.innerHTML = "";
+
+          if (!data) {
+            document.getElementById("statTotal").textContent = "0";
+            document.getElementById("statPending").textContent = "0";
+            document.getElementById("statDone").textContent = "0";
+            listEl.innerHTML = `<p style="color:#94a3b8; font-size:13px;">এখনো কোনো অর্ডার আসেনি।</p>`;
+            return;
+          }
+
+          const entries = Object.entries(data).sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
+          let pending = 0, done = 0;
+          entries.forEach(([, o]) => {
+            if (o.status === "Pending") pending++;
+            if (o.status === "Completed") done++;
+          });
+
+          document.getElementById("statTotal").textContent = entries.length;
+          document.getElementById("statPending").textContent = pending;
+          document.getElementById("statDone").textContent = done;
+
+          entries.forEach(([id, o]) => {
+            const card = document.createElement("div");
+            card.className = "card-item";
+            const status = o.status || "Pending";
+            const timeStr = o.createdAt ? new Date(o.createdAt).toLocaleString("bn-BD") : "";
+
+            card.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <b>#${escapeHtml(id.slice(-6).toUpperCase())}</b>
+                <span class="badge badge-${escapeHtml(status)}">${escapeHtml(status)}</span>
+              </div>
+              <div>🎮 <b>UID:</b> ${escapeHtml(o.uid)}</div>
+              <div>💎 <b>প্যাকেজ:</b> ${escapeHtml(o.packageName)} (${escapeHtml(o.price)} টাকা)</div>
+              <div>💳 <b>পেমেন্ট:</b> ${escapeHtml(o.method)} | <b>নম্বর:</b> ${escapeHtml(o.sender)}</div>
+              <div>🧾 <b>TrxID:</b> ${escapeHtml(o.trxid)}</div>
+              <div>📱 <b>WhatsApp:</b> ${escapeHtml(o.whatsapp)}</div>
+              <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${escapeHtml(timeStr)}</div>
+            `;
+
+            const actions = document.createElement("div");
+            actions.className = "actions";
+
+            const doneBtn = document.createElement("button");
+            doneBtn.className = "btn btn-green btn-sm";
+            doneBtn.textContent = "✅ Complete";
+            doneBtn.onclick = () => update(ref(db, "orders/" + id), { status: "Completed" });
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.className = "btn btn-gray btn-sm";
+            cancelBtn.textContent = "❌ Cancel";
+            cancelBtn.onclick = () => update(ref(db, "orders/" + id), { status: "Cancelled" });
+
+            const delBtn = document.createElement("button");
+            delBtn.className = "btn btn-red btn-sm";
+            delBtn.textContent = "🗑️ Delete";
+            delBtn.onclick = () => { if (confirm("অর্ডারটি ডিলিট করবেন?")) remove(ref(db, "orders/" + id)); };
+
+            actions.append(doneBtn, cancelBtn, delBtn);
+            card.appendChild(actions);
+            listEl.appendChild(card);
+          });
+        });
+      } else {
+        if (ordersUnsub) {
+          ordersUnsub();
+          ordersUnsub = null;
+        }
+        if (!document.getElementById("adminPanelView").classList.contains("hidden")) {
+          document.getElementById("adminPanelView").classList.add("hidden");
+          document.getElementById("adminLoginView").classList.remove("hidden");
+        }
+      }
+    });
+
+    // ৫. নতুন প্যাকেজ যোগ
+    document.getElementById("addPkgBtn").onclick = async () => {
+      const name = document.getElementById("newPkgName").value.trim();
+      const price = document.getElementById("newPkgPrice").value.trim();
+      if (!name || !price) return alert("প্যাকেজের নাম এবং দাম লিখুন!");
+      try {
+        await set(push(ref(db, "packages")), { name, price });
+        document.getElementById("newPkgName").value = "";
+        document.getElementById("newPkgPrice").value = "";
+        alert("✅ নতুন প্যাকেজ যোগ হয়েছে!");
+      } catch (err) {
+        alert("সমস্যা হয়েছে: " + err.message);
+      }
+    };
+
+    document.getElementById("addDefaultPkgsBtn").onclick = async () => {
+      if (!confirm("ডিফল্ট ডায়মন্ড প্যাকেজগুলো যোগ করতে চান?")) return;
+      const defaults = [
+        { name: "25 Diamonds", price: "25" },
+        { name: "50 Diamonds", price: "45" },
+        { name: "115 Diamonds", price: "85" },
+        { name: "240 Diamonds", price: "170" },
+        { name: "610 Diamonds", price: "420" },
+        { name: "1240 Diamonds", price: "840" },
+        { name: "Weekly Membership", price: "160" },
+        { name: "Monthly Membership", price: "790" }
+      ];
+      try {
+        for (const pkg of defaults) {
+          await set(push(ref(db, "packages")), pkg);
+        }
+        alert("✅ ডিফল্ট প্যাকেজগুলো যোগ হয়েছে!");
+      } catch (err) {
+        alert("সমস্যা হয়েছে: " + err.message);
+      }
+    };
+
+    // ৬. সেটিংস সেভ
+    document.getElementById("saveSettingsBtn").onclick = async () => {
+      try {
+        await set(ref(db, "settings"), {
+          status: document.getElementById("setShopStatus").value,
+          notice: document.getElementById("setNotice").value.trim(),
+          bkash: document.getElementById("setBkash").value.trim(),
+          nagad: document.getElementById("setNagad").value.trim(),
+          rocket: document.getElementById("setRocket").value.trim()
+        });
+        alert("✅ সেটিংস সেভ হয়েছে!");
+      } catch (err) {
+        alert("সেভ করতে সমস্যা হয়েছে: " + err.message);
+      }
+    };
+  </script>
+</body>
+</html>
